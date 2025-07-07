@@ -60,10 +60,10 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/login">
+              <Link to="/dashboard/profile">
                 <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span>Masuk</span>
+                  <span>Akun Saya</span>
                 </Button>
               </Link>
               
@@ -110,9 +110,9 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border py-4">
             <div className="flex flex-col space-y-2">
-              <Link to="/login" className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md">
+              <Link to="/dashboard/profile" className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md">
                 <User className="h-4 w-4" />
-                <span>Masuk / Daftar</span>
+                <span>Akun Saya</span>
               </Link>
               <Link to="/cart" className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md">
                 <ShoppingCart className="h-4 w-4" />
