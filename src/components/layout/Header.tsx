@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <header className="bg-background border-b border-border sticky top-0 z-50">
@@ -27,19 +38,22 @@ const Header = () => {
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
               <Input
                 type="text"
                 placeholder="Cari produk, brand, atau kategori..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-4 pr-12 h-12 rounded-l-md border-r-0"
               />
               <Button 
+                type="submit"
                 size="sm" 
                 className="absolute right-0 top-0 h-12 px-6 rounded-l-none"
               >
                 <Search className="h-4 w-4" />
               </Button>
-            </div>
+            </form>
           </div>
 
           {/* Right Section */}
@@ -78,16 +92,18 @@ const Header = () => {
 
         {/* Mobile Search */}
         <div className="md:hidden pb-4">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <Input
               type="text"
               placeholder="Cari produk..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-4 pr-12 h-10"
             />
-            <Button size="sm" className="absolute right-1 top-1 h-8 px-3">
+            <Button type="submit" size="sm" className="absolute right-1 top-1 h-8 px-3">
               <Search className="h-3 w-3" />
             </Button>
-          </div>
+          </form>
         </div>
 
         {/* Mobile Menu */}
