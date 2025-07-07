@@ -13,6 +13,8 @@ import OrderSuccess from "./pages/OrderSuccess";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
+import AboutUs from "./pages/AboutUs";
+import PurchaseGuide from "./pages/PurchaseGuide";
 import LiveChat from "./pages/LiveChat";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import Profile from "./pages/dashboard/Profile";
@@ -50,6 +52,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/purchase-guide" element={<PurchaseGuide />} />
           <Route path="/live-chat" element={<LiveChat />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="profile" element={<Profile />} />
