@@ -393,6 +393,7 @@ const ShoppingCart = () => {
                   size="lg"
                   className="w-full"
                   disabled={selectedItems.length === 0}
+                  onClick={() => window.location.href = '/checkout'}
                 >
                   Checkout ({selectedItems.length} produk)
                   <ArrowRight className="ml-2 h-4 w-4" />
