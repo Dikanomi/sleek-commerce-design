@@ -91,8 +91,8 @@ const Products = () => {
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    const matchesStatus = !selectedStatus || 
+    const matchesCategory = selectedCategory === "all" || !selectedCategory || product.category === selectedCategory;
+    const matchesStatus = selectedStatus === "all" || !selectedStatus || 
       (selectedStatus === "active" && product.status === "active") ||
       (selectedStatus === "low_stock" && (product.status === "low_stock" || product.stock < 10)) ||
       (selectedStatus === "out_of_stock" && (product.status === "out_of_stock" || product.stock === 0));
@@ -174,7 +174,7 @@ const Products = () => {
                 <SelectValue placeholder="Semua Kategori" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Semua Kategori</SelectItem>
+                <SelectItem value="all">Semua Kategori</SelectItem>
                 <SelectItem value="Elektronik">Elektronik</SelectItem>
                 <SelectItem value="Fashion">Fashion</SelectItem>
                 <SelectItem value="Rumah Tangga">Rumah Tangga</SelectItem>
@@ -185,7 +185,7 @@ const Products = () => {
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Semua Status</SelectItem>
+                <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="active">Aktif</SelectItem>
                 <SelectItem value="low_stock">Stok Sedikit</SelectItem>
                 <SelectItem value="out_of_stock">Stok Habis</SelectItem>

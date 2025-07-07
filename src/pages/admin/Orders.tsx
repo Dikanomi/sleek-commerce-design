@@ -106,7 +106,7 @@ const AdminOrders = () => {
     const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          order.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !selectedStatus || order.status === selectedStatus;
+    const matchesStatus = selectedStatus === "all" || !selectedStatus || order.status === selectedStatus;
     
     return matchesSearch && matchesStatus;
   });
@@ -200,7 +200,7 @@ const AdminOrders = () => {
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Semua Status</SelectItem>
+                <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="pending">Menunggu</SelectItem>
                 <SelectItem value="processing">Diproses</SelectItem>
                 <SelectItem value="shipped">Dikirim</SelectItem>
