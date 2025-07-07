@@ -35,6 +35,11 @@ import SuperAdminLayout from "./pages/super-admin/SuperAdminLayout";
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 import VendorManagement from "./pages/super-admin/VendorManagement";
 import CommissionRevenue from "./pages/super-admin/CommissionRevenue";
+import UserManagement from "./pages/super-admin/UserManagement";
+import VendorAnalytics from "./pages/super-admin/VendorAnalytics";
+import Approvals from "./pages/super-admin/Approvals";
+import Reports from "./pages/super-admin/Reports";
+import SuperAdminSettings from "./pages/super-admin/SuperAdminSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,7 +84,12 @@ const App = () => (
           <Route path="/super-admin" element={<SuperAdminLayout />}>
             <Route index element={<SuperAdminDashboard />} />
             <Route path="vendors" element={<VendorManagement />} />
+            <Route path="users" element={<UserManagement />} />
             <Route path="revenue" element={<CommissionRevenue />} />
+            <Route path="analytics" element={<VendorAnalytics />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="approvals" element={<Approvals />} />
+            <Route path="settings" element={<SuperAdminSettings />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
