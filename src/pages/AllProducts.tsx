@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/product-card";
+import ChatBubble from "@/components/ui/chat-bubble";
 import { Link } from "react-router-dom";
 
 const AllProducts = () => {
@@ -441,6 +442,7 @@ const AllProducts = () => {
       </div>
       
       <Footer />
+      <ChatBubble />
     </div>
   );
 };
