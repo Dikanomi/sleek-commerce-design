@@ -16,6 +16,10 @@ import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import Profile from "./pages/dashboard/Profile";
 import Orders from "./pages/dashboard/Orders";
 import Wishlist from "./pages/dashboard/Wishlist";
+import Addresses from "./pages/dashboard/Addresses";
+import PaymentMethods from "./pages/dashboard/PaymentMethods";
+import Notifications from "./pages/dashboard/Notifications";
+import Security from "./pages/dashboard/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +44,10 @@ const App = () => (
             <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<Orders />} />
             <Route path="wishlist" element={<Wishlist />} />
+            <Route path="addresses" element={<Addresses />} />
+            <Route path="payment-methods" element={<PaymentMethods />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="security" element={<Security />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
