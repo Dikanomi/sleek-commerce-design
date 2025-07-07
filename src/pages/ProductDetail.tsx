@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/product-card";
@@ -108,6 +109,57 @@ const ProductDetail = () => {
       discount: 14,
       isFreeShipping: true,
       location: "Bandung"
+    }
+  ];
+
+  const comparisonProducts = [
+    {
+      id: product.id,
+      name: product.title,
+      image: product.images[0],
+      price: product.price,
+      rating: product.rating,
+      storage: "256GB",
+      camera: "108MP",
+      ram: "8GB",
+      battery: "5000mAh",
+      processor: "Snapdragon 8 Gen 2"
+    },
+    {
+      id: "comp1",
+      name: "iPhone 15 Pro Max 256GB",
+      image: productSmartphone,
+      price: 21999000,
+      rating: 4.8,
+      storage: "256GB",
+      camera: "48MP",
+      ram: "8GB",
+      battery: "4441mAh",
+      processor: "A17 Pro"
+    },
+    {
+      id: "comp2", 
+      name: "Samsung Galaxy S24 Ultra 256GB",
+      image: productSmartphone,
+      price: 19999000,
+      rating: 4.6,
+      storage: "256GB", 
+      camera: "200MP",
+      ram: "12GB",
+      battery: "5000mAh",
+      processor: "Snapdragon 8 Gen 3"
+    },
+    {
+      id: "comp3",
+      name: "Google Pixel 8 Pro 256GB", 
+      image: productSmartphone,
+      price: 15999000,
+      rating: 4.5,
+      storage: "256GB",
+      camera: "50MP",
+      ram: "12GB", 
+      battery: "5050mAh",
+      processor: "Google Tensor G3"
     }
   ];
 
@@ -377,6 +429,68 @@ const ProductDetail = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Product Comparison Table */}
+        <section className="mb-12">
+          <h3 className="text-2xl font-bold mb-6">Perbandingan dengan Produk Serupa</h3>
+          <Card>
+            <CardContent className="p-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Produk</TableHead>
+                      <TableHead>Harga</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Storage</TableHead>
+                      <TableHead>Kamera</TableHead>
+                      <TableHead>RAM</TableHead>
+                      <TableHead>Baterai</TableHead>
+                      <TableHead>Processor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {comparisonProducts.map((item, index) => (
+                      <TableRow key={item.id} className={index === 0 ? "bg-primary/5" : ""}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <img 
+                              src={item.image} 
+                              alt={item.name}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                            <div>
+                              <p className="font-medium text-sm">{item.name}</p>
+                              {index === 0 && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  Produk Ini
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatPrice(item.price)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1">
+                            <div className="flex">{renderStars(item.rating)}</div>
+                            <span className="text-sm font-medium">{item.rating}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{item.storage}</TableCell>
+                        <TableCell>{item.camera}</TableCell>
+                        <TableCell>{item.ram}</TableCell>
+                        <TableCell>{item.battery}</TableCell>
+                        <TableCell>{item.processor}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Related Products */}
         <section>
