@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ChatBubble from "@/components/ui/chat-bubble";
+
 import { Link } from "react-router-dom";
 
 const AboutUs = () => {
@@ -223,7 +223,6 @@ const AboutUs = () => {
       </div>
       
       <Footer />
-      <ChatBubble />
     </div>
   );
 };

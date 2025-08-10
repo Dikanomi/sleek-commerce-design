@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ChatManager from "@/components/chat/ChatManager";
 import Index from "./pages/Index";
 import AllProducts from "./pages/AllProducts";
 import ProductListing from "./pages/ProductListing";
@@ -16,6 +17,7 @@ import SearchResults from "./pages/SearchResults";
 import AboutUs from "./pages/AboutUs";
 import PurchaseGuide from "./pages/PurchaseGuide";
 import LiveChat from "./pages/LiveChat";
+import Chat from "./pages/Chat";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import Profile from "./pages/dashboard/Profile";
 import Orders from "./pages/dashboard/Orders";
@@ -64,6 +66,7 @@ const App = () => (
           <Route path="/about" element={<AboutUs />} />
           <Route path="/purchase-guide" element={<PurchaseGuide />} />
           <Route path="/live-chat" element={<LiveChat />} />
+          <Route path="/chat/:roomId" element={<Chat />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<Orders />} />
@@ -94,6 +97,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatManager />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

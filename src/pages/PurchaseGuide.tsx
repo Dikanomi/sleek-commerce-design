@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ChatBubble from "@/components/ui/chat-bubble";
+
 import { Link } from "react-router-dom";
 
 const PurchaseGuide = () => {
@@ -310,7 +310,6 @@ const PurchaseGuide = () => {
       </div>
       
       <Footer />
-      <ChatBubble />
     </div>
   );
 };
