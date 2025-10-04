@@ -29,7 +29,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to="/help" className="text-muted-foreground hover:text-foreground transition-colors">Pusat Bantuan</Link></li>
               <li><Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Hubungi Kami</Link></li>
-              <li><Link to="/shipping" className="text-muted-foreground hover:text-foreground transition-colors">Cara Pembelian</Link></li>
+              <li><Link to="/purchase-guide" className="text-muted-foreground hover:text-foreground transition-colors">Cara Pembelian</Link></li>
               <li><Link to="/returns" className="text-muted-foreground hover:text-foreground transition-colors">Pengembalian</Link></li>
               <li><Link to="/warranty" className="text-muted-foreground hover:text-foreground transition-colors">Garansi</Link></li>
             </ul>

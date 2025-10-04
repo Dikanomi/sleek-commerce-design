@@ -16,6 +16,9 @@ import Register from "./pages/Register";
 import SearchResults from "./pages/SearchResults";
 import AboutUs from "./pages/AboutUs";
 import PurchaseGuide from "./pages/PurchaseGuide";
+import HelpCenter from "./pages/HelpCenter";
+import Returns from "./pages/Returns";
+import Warranty from "./pages/Warranty";
 import LiveChat from "./pages/LiveChat";
 import Chat from "./pages/Chat";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
@@ -65,6 +68,9 @@ const App = () => (
           <Route path="/search" element={<SearchResults />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/purchase-guide" element={<PurchaseGuide />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/warranty" element={<Warranty />} />
           <Route path="/live-chat" element={<LiveChat />} />
           <Route path="/chat/:roomId" element={<Chat />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
