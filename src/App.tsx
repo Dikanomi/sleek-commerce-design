@@ -46,6 +46,9 @@ import Approvals from "./pages/super-admin/Approvals";
 import Reports from "./pages/super-admin/Reports";
 import SuperAdminSettings from "./pages/super-admin/SuperAdminSettings";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import CookiePolicy from "./pages/CookiePolicy";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +76,9 @@ const App = () => (
           <Route path="/warranty" element={<Warranty />} />
           <Route path="/live-chat" element={<LiveChat />} />
           <Route path="/chat/:roomId" element={<Chat />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<Orders />} />
