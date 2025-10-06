@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,11 +19,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const Products = () => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    description: "",
+    image: ""
+  });
 
   const products = [
     {
@@ -100,6 +117,60 @@ const Products = () => {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const handleOpenDialog = (product?: any) => {
+    if (product) {
+      setEditingProduct(product);
+      setFormData({
+        name: product.name,
+        category: product.category,
+        price: product.price.replace("Rp ", "").replace(/\./g, ""),
+        stock: product.stock.toString(),
+        description: "",
+        image: product.image
+      });
+    } else {
+      setEditingProduct(null);
+      setFormData({
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        description: "",
+        image: ""
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Here you would normally save to a database
+    toast({
+      title: editingProduct ? "Produk berhasil diupdate" : "Produk berhasil ditambahkan",
+      description: `${formData.name} telah ${editingProduct ? "diupdate" : "ditambahkan"} ke katalog.`,
+    });
+    
+    setIsDialogOpen(false);
+    setFormData({
+      name: "",
+      category: "",
+      price: "",
+      stock: "",
+      description: "",
+      image: ""
+    });
+  };
+
+  const handleDelete = (productId: string, productName: string) => {
+    // Here you would normally delete from database
+    toast({
+      title: "Produk berhasil dihapus",
+      description: `${productName} telah dihapus dari katalog.`,
+      variant: "destructive"
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -110,10 +181,117 @@ const Products = () => {
             Kelola semua produk di toko Anda
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Produk
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Produk
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingProduct ? "Edit Produk" : "Tambah Produk Baru"}</DialogTitle>
+              <DialogDescription>
+                {editingProduct ? "Perbarui informasi produk di bawah ini" : "Isi informasi produk baru di bawah ini"}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nama Produk *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="iPhone 15 Pro Max"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category">Kategori *</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih kategori" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Elektronik">Elektronik</SelectItem>
+                      <SelectItem value="Fashion">Fashion</SelectItem>
+                      <SelectItem value="Rumah Tangga">Rumah Tangga</SelectItem>
+                      <SelectItem value="Olahraga">Olahraga</SelectItem>
+                      <SelectItem value="Kecantikan">Kecantikan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Harga (Rp) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="20999000"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stock">Jumlah Stok *</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    placeholder="45"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Deskripsi Produk</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Deskripsikan produk Anda..."
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image">URL Gambar</Label>
+                <Input
+                  id="image"
+                  value={formData.image}
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  placeholder="/src/assets/product-image.jpg"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Masukkan URL gambar produk atau upload gambar
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Batal
+                </Button>
+                <Button type="submit">
+                  {editingProduct ? "Update Produk" : "Tambah Produk"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -257,11 +435,14 @@ const Products = () => {
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Detail
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenDialog(product)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Produk
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => handleDelete(product.id, product.name)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Hapus Produk
                         </DropdownMenuItem>
