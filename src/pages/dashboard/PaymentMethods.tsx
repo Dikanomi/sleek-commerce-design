@@ -24,6 +24,7 @@ interface PaymentMethod {
 const PaymentMethods = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
@@ -121,24 +122,45 @@ const PaymentMethods = () => {
   };
 
   const handleSave = () => {
-    const newPaymentMethod: PaymentMethod = {
-      id: Date.now().toString(),
-      type: formData.type as any,
-      name: formData.name,
-      details: formData.type === "ewallet" 
-        ? formData.phone 
-        : formData.type === "credit_card" 
-          ? `•••• •••• •••• ${formData.cardNumber.slice(-4)}`
-          : `•••• •••• •••• ${formData.accountNumber.slice(-4)}`,
-      isDefault: paymentMethods.length === 0,
-      isActive: true,
-      addedDate: new Date().toISOString().split('T')[0],
-      icon: formData.type === "bank" ? "🏦" : formData.type === "ewallet" ? "💰" : "💳"
-    };
-    
-    setPaymentMethods(prev => [...prev, newPaymentMethod]);
+    if (editingId) {
+      // Update existing payment method
+      setPaymentMethods(prev => prev.map(method => 
+        method.id === editingId 
+          ? {
+              ...method,
+              type: formData.type as any,
+              name: formData.name,
+              details: formData.type === "ewallet" 
+                ? formData.phone 
+                : formData.type === "credit_card" 
+                  ? `•••• •••• •••• ${formData.cardNumber.slice(-4)}`
+                  : `•••• •••• •••• ${formData.accountNumber.slice(-4)}`,
+              icon: formData.type === "bank" ? "🏦" : formData.type === "ewallet" ? "💰" : "💳"
+            }
+          : method
+      ));
+    } else {
+      // Add new payment method
+      const newPaymentMethod: PaymentMethod = {
+        id: Date.now().toString(),
+        type: formData.type as any,
+        name: formData.name,
+        details: formData.type === "ewallet" 
+          ? formData.phone 
+          : formData.type === "credit_card" 
+            ? `•••• •••• •••• ${formData.cardNumber.slice(-4)}`
+            : `•••• •••• •••• ${formData.accountNumber.slice(-4)}`,
+        isDefault: paymentMethods.length === 0,
+        isActive: true,
+        addedDate: new Date().toISOString().split('T')[0],
+        icon: formData.type === "bank" ? "🏦" : formData.type === "ewallet" ? "💰" : "💳"
+      };
+      
+      setPaymentMethods(prev => [...prev, newPaymentMethod]);
+    }
     setIsDialogOpen(false);
     resetForm();
+    setEditingId(null);
   };
 
   const handleDelete = (id: string) => {
@@ -166,6 +188,22 @@ const PaymentMethods = () => {
 
   const openAddDialog = () => {
     resetForm();
+    setEditingId(null);
+    setIsDialogOpen(true);
+  };
+
+  const openEditDialog = (method: PaymentMethod) => {
+    setEditingId(method.id);
+    setSelectedType(method.type);
+    setFormData({
+      type: method.type,
+      name: method.name,
+      accountNumber: method.type === "bank" ? method.details.replace(/[•\s]/g, '') : "",
+      phone: method.type === "ewallet" ? method.details : "",
+      cardNumber: method.type === "credit_card" ? method.details.replace(/[•\s]/g, '') : "",
+      expiryDate: "",
+      holderName: ""
+    });
     setIsDialogOpen(true);
   };
 
@@ -187,7 +225,7 @@ const PaymentMethods = () => {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Tambah Metode Pembayaran</DialogTitle>
+              <DialogTitle>{editingId ? "Edit" : "Tambah"} Metode Pembayaran</DialogTitle>
               <DialogDescription>
                 Pilih jenis pembayaran dan isi detail yang diperlukan
               </DialogDescription>
@@ -380,7 +418,11 @@ const PaymentMethods = () => {
                         <span className="text-sm text-muted-foreground">Aktif</span>
                       </div>
                       
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => openEditDialog(method)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       

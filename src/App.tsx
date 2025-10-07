@@ -24,6 +24,7 @@ import Chat from "./pages/Chat";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import Profile from "./pages/dashboard/Profile";
 import Orders from "./pages/dashboard/Orders";
+import OrderDetail from "./pages/dashboard/OrderDetail";
 import Wishlist from "./pages/dashboard/Wishlist";
 import Addresses from "./pages/dashboard/Addresses";
 import PaymentMethods from "./pages/dashboard/PaymentMethods";
@@ -82,6 +83,7 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="orders/:orderId" element={<OrderDetail />} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="addresses" element={<Addresses />} />
             <Route path="payment-methods" element={<PaymentMethods />} />

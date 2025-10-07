@@ -310,9 +310,11 @@ const Orders = () => {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        Detail
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/dashboard/orders/${order.id}`}>
+                          <Eye className="w-4 h-4 mr-1" />
+                          Detail
+                        </Link>
                       </Button>
                       
                       {order.status === "delivered" && (
