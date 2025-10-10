@@ -110,7 +110,7 @@ const Customers = () => {
     const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          customer.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !selectedStatus || customer.status === selectedStatus;
+    const matchesStatus = !selectedStatus || selectedStatus === "all" || customer.status === selectedStatus;
     
     return matchesSearch && matchesStatus;
   });
@@ -199,7 +199,7 @@ const Customers = () => {
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Semua Status</SelectItem>
+                <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="active">Aktif</SelectItem>
                 <SelectItem value="inactive">Tidak Aktif</SelectItem>
                 <SelectItem value="suspended">Diblokir</SelectItem>
