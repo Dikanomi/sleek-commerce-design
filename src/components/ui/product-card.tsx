@@ -3,6 +3,9 @@ import { ShoppingCart, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCartStore } from "@/stores/cartStore";
+import { useWishlistStore } from "@/stores/wishlistStore";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   id: string;
@@ -31,12 +34,52 @@ const ProductCard = ({
   isFreeShipping = false,
   location = "Jakarta"
 }: ProductCardProps) => {
+  const { addItem: addToCart } = useCartStore();
+  const { toggleItem: toggleWishlist, isInWishlist } = useWishlistStore();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      image,
+      title,
+      price,
+      originalPrice,
+      stock: 50,
+      seller: "Official Store",
+      isFreeShipping,
+      discount
+    });
+    toast.success("Produk ditambahkan ke keranjang");
+  };
+
+  const handleToggleWishlist = () => {
+    toggleWishlist({
+      id,
+      image,
+      title,
+      price,
+      originalPrice,
+      rating,
+      sold,
+      discount,
+      isAvailable: true,
+      isFreeShipping,
+      location
+    });
+    
+    if (isInWishlist(id)) {
+      toast.success("Produk dihapus dari wishlist");
+    } else {
+      toast.success("Produk ditambahkan ke wishlist");
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -91,14 +134,16 @@ const ProductCard = ({
             size="sm"
             variant="secondary"
             className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleToggleWishlist}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${isInWishlist(id) ? "fill-red-500 text-red-500" : ""}`} />
           </Button>
 
           {/* Quick Add to Cart */}
           <Button
             size="sm"
             className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleAddToCart}
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
             +

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, Trash2, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,94 +6,87 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWishlistStore } from "@/stores/wishlistStore";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
 import productHeadphones from "@/assets/product-headphones.jpg";
 import productSmartphone from "@/assets/product-smartphone.jpg";
 import productLaptop from "@/assets/product-laptop.jpg";
 
 const Wishlist = () => {
+  const { items: wishlistItems, removeItem, clearWishlist } = useWishlistStore();
+  const { addItem: addToCart } = useCartStore();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("newest");
 
-  // Mock wishlist data
-  const [wishlistItems, setWishlistItems] = useState([
-    {
-      id: "w1",
-      image: productSmartphone,
-      title: "iPhone 15 Pro Max 256GB Natural Titanium",
-      price: 24999000,
-      originalPrice: 26999000,
-      rating: 4.8,
-      sold: 123,
-      discount: 7,
-      isAvailable: true,
-      isFreeShipping: true,
-      location: "Jakarta Selatan",
-      addedDate: "2024-01-20",
-      priceHistory: [
-        { date: "2024-01-20", price: 24999000 },
-        { date: "2024-01-15", price: 25999000 },
-        { date: "2024-01-10", price: 26999000 }
-      ]
-    },
-    {
-      id: "w2",
-      image: productLaptop,
-      title: "MacBook Air M2 13-inch 8GB 256GB Space Gray",
-      price: 18999000,
-      originalPrice: 21999000,
-      rating: 4.9,
-      sold: 234,
-      discount: 14,
-      isAvailable: true,
-      isFreeShipping: true,
-      location: "Jakarta Pusat",
-      addedDate: "2024-01-18",
-      priceHistory: [
-        { date: "2024-01-18", price: 18999000 },
-        { date: "2024-01-12", price: 19999000 },
-        { date: "2024-01-05", price: 21999000 }
-      ]
-    },
-    {
-      id: "w3",
-      image: productHeadphones,
-      title: "Sony WH-1000XM5 Noise Canceling Headphones",
-      price: 4299000,
-      originalPrice: 4999000,
-      rating: 4.7,
-      sold: 567,
-      discount: 14,
-      isAvailable: false,
-      isFreeShipping: true,
-      location: "Bandung",
-      addedDate: "2024-01-15",
-      priceHistory: [
-        { date: "2024-01-15", price: 4299000 },
-        { date: "2024-01-08", price: 4599000 },
-        { date: "2024-01-01", price: 4999000 }
-      ]
-    },
-    // Add more mock items
-    ...Array(9).fill(null).map((_, index) => ({
-      id: `w${index + 4}`,
-      image: [productSmartphone, productLaptop, productHeadphones][index % 3],
-      title: [
-        "Samsung Galaxy S24 Ultra 512GB",
-        "ASUS ROG Zephyrus Gaming Laptop",
-        "AirPods Pro 2nd Generation"
-      ][index % 3],
-      price: [21999000, 19999000, 3599000][index % 3],
-      originalPrice: [24999000, 23999000, 3999000][index % 3],
-      rating: 4.5 + (index % 5) * 0.1,
-      sold: 100 + index * 50,
-      discount: 10 + (index % 3) * 5,
-      isAvailable: index % 4 !== 0,
-      isFreeShipping: true,
-      location: ["Jakarta", "Bandung", "Surabaya"][index % 3],
-      addedDate: `2024-01-${20 - index}`,
-      priceHistory: []
-    }))
-  ]);
+  // Initialize wishlist with sample data on first load
+  useEffect(() => {
+    if (wishlistItems.length === 0) {
+      const { addItem } = useWishlistStore.getState();
+      
+      const sampleItems = [
+        {
+          id: "w1",
+          image: productSmartphone,
+          title: "iPhone 15 Pro Max 256GB Natural Titanium",
+          price: 24999000,
+          originalPrice: 26999000,
+          rating: 4.8,
+          sold: 123,
+          discount: 7,
+          isAvailable: true,
+          isFreeShipping: true,
+          location: "Jakarta Selatan",
+          addedDate: "2024-01-20",
+          priceHistory: [
+            { date: "2024-01-20", price: 24999000 },
+            { date: "2024-01-15", price: 25999000 },
+            { date: "2024-01-10", price: 26999000 }
+          ]
+        },
+        {
+          id: "w2",
+          image: productLaptop,
+          title: "MacBook Air M2 13-inch 8GB 256GB Space Gray",
+          price: 18999000,
+          originalPrice: 21999000,
+          rating: 4.9,
+          sold: 234,
+          discount: 14,
+          isAvailable: true,
+          isFreeShipping: true,
+          location: "Jakarta Pusat",
+          addedDate: "2024-01-18",
+          priceHistory: [
+            { date: "2024-01-18", price: 18999000 },
+            { date: "2024-01-12", price: 19999000 },
+            { date: "2024-01-05", price: 21999000 }
+          ]
+        },
+        {
+          id: "w3",
+          image: productHeadphones,
+          title: "Sony WH-1000XM5 Noise Canceling Headphones",
+          price: 4299000,
+          originalPrice: 4999000,
+          rating: 4.7,
+          sold: 567,
+          discount: 14,
+          isAvailable: false,
+          isFreeShipping: true,
+          location: "Bandung",
+          addedDate: "2024-01-15",
+          priceHistory: [
+            { date: "2024-01-15", price: 4299000 },
+            { date: "2024-01-08", price: 4599000 },
+            { date: "2024-01-01", price: 4999000 }
+          ]
+        }
+      ];
+
+      sampleItems.forEach(item => addItem(item));
+    }
+  }, []);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -137,22 +130,37 @@ const Wishlist = () => {
   };
 
   const removeFromWishlist = (id: string) => {
-    setWishlistItems(prev => prev.filter(item => item.id !== id));
+    removeItem(id);
     setSelectedItems(prev => prev.filter(item => item !== id));
+    toast.success("Produk dihapus dari wishlist");
   };
 
   const removeSelectedItems = () => {
-    setWishlistItems(prev => prev.filter(item => !selectedItems.includes(item.id)));
+    selectedItems.forEach(id => removeItem(id));
     setSelectedItems([]);
+    toast.success(`${selectedItems.length} produk dihapus dari wishlist`);
   };
 
-  const addToCart = (id: string) => {
-    console.log(`Adding item ${id} to cart`);
-    // In real app, add to cart functionality
+  const handleAddToCart = (id: string) => {
+    const item = wishlistItems.find(i => i.id === id);
+    if (!item) return;
+
+    addToCart({
+      id: item.id,
+      image: item.image,
+      title: item.title,
+      price: item.price,
+      originalPrice: item.originalPrice,
+      stock: 50,
+      seller: "Official Store",
+      isFreeShipping: item.isFreeShipping,
+      discount: item.discount
+    });
+    toast.success("Produk ditambahkan ke keranjang");
   };
 
-  const addAllToCart = () => {
-    selectedItems.forEach(id => addToCart(id));
+  const handleAddAllToCart = () => {
+    selectedItems.forEach(id => handleAddToCart(id));
     setSelectedItems([]);
   };
 
@@ -195,7 +203,10 @@ const Wishlist = () => {
         </div>
         
         {wishlistItems.length > 0 && (
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => {
+            clearWishlist();
+            toast.success("Wishlist dikosongkan");
+          }}>
             <Filter className="h-4 w-4 mr-2" />
             Bersihkan Wishlist
           </Button>
@@ -237,7 +248,7 @@ const Wishlist = () => {
                   
                   {selectedItems.length > 0 && (
                     <div className="flex space-x-2">
-                      <Button size="sm" onClick={addAllToCart}>
+                      <Button size="sm" onClick={handleAddAllToCart}>
                         <ShoppingCart className="h-4 w-4 mr-1" />
                         Tambah ke Keranjang ({selectedItems.length})
                       </Button>
@@ -369,7 +380,7 @@ const Wishlist = () => {
                             <Button 
                               size="sm" 
                               className="w-full"
-                              onClick={() => addToCart(item.id)}
+                              onClick={() => handleAddToCart(item.id)}
                             >
                               <ShoppingCart className="h-4 w-4 mr-2" />
                               Tambah ke Keranjang

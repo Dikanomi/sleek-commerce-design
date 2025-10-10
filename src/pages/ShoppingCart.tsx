@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, Heart, ShoppingCart as CartIcon, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,69 +10,56 @@ import { Separator } from "@/components/ui/separator";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/product-card";
+import { useCartStore } from "@/stores/cartStore";
+import { useWishlistStore } from "@/stores/wishlistStore";
 import productHeadphones from "@/assets/product-headphones.jpg";
 import productSmartphone from "@/assets/product-smartphone.jpg";
 import productLaptop from "@/assets/product-laptop.jpg";
 
-interface CartItem {
-  id: string;
-  image: string;
-  title: string;
-  price: number;
-  originalPrice?: number;
-  quantity: number;
-  stock: number;
-  seller: string;
-  isSelected: boolean;
-  isFreeShipping: boolean;
-  discount?: number;
-}
-
 const ShoppingCart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "cart1",
-      image: productSmartphone,
-      title: "Smartphone Android RAM 8GB Storage 256GB Camera 108MP",
-      price: 2499000,
-      originalPrice: 4999000,
-      quantity: 1,
-      stock: 25,
-      seller: "ElektronikStore Official",
-      isSelected: true,
-      isFreeShipping: true,
-      discount: 50
-    },
-    {
-      id: "cart2",
-      image: productHeadphones,
-      title: "Headphone Wireless Premium Bluetooth 5.0 Noise Cancelling",
-      price: 299000,
-      originalPrice: 999000,
-      quantity: 2,
-      stock: 50,
-      seller: "AudioTech Store",
-      isSelected: true,
-      isFreeShipping: true,
-      discount: 70
-    },
-    {
-      id: "cart3",
-      image: productLaptop,
-      title: "Laptop Gaming Intel i7 RAM 16GB SSD 512GB RTX 3060",
-      price: 12999000,
-      originalPrice: 18999000,
-      quantity: 1,
-      stock: 10,
-      seller: "GamingHub Official",
-      isSelected: false,
-      isFreeShipping: true,
-      discount: 32
-    }
-  ]);
-
+  const { items: cartItems, updateQuantity, removeItem, toggleItemSelection, toggleSelectAll } = useCartStore();
+  const { toggleItem: toggleWishlist } = useWishlistStore();
   const [promoCode, setPromoCode] = useState("");
-  const [selectAll, setSelectAll] = useState(false);
+
+  // Initialize cart with sample data on first load
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      const { addItem } = useCartStore.getState();
+      addItem({
+        id: "cart1",
+        image: productSmartphone,
+        title: "Smartphone Android RAM 8GB Storage 256GB Camera 108MP",
+        price: 2499000,
+        originalPrice: 4999000,
+        stock: 25,
+        seller: "ElektronikStore Official",
+        isFreeShipping: true,
+        discount: 50
+      });
+      addItem({
+        id: "cart2",
+        image: productHeadphones,
+        title: "Headphone Wireless Premium Bluetooth 5.0 Noise Cancelling",
+        price: 299000,
+        originalPrice: 999000,
+        stock: 50,
+        seller: "AudioTech Store",
+        isFreeShipping: true,
+        discount: 70
+      });
+      addItem({
+        id: "cart3",
+        image: productLaptop,
+        title: "Laptop Gaming Intel i7 RAM 16GB SSD 512GB RTX 3060",
+        price: 12999000,
+        originalPrice: 18999000,
+        stock: 10,
+        seller: "GamingHub Official",
+        isFreeShipping: true,
+        discount: 32
+      });
+    }
+  }, []);
 
   const recommendedProducts = [
     {
@@ -109,34 +96,20 @@ const ShoppingCart = () => {
     }).format(price);
   };
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, Math.min(item.stock, newQuantity)) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const toggleItemSelection = (id: string) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      )
-    );
-  };
-
-  const toggleSelectAll = () => {
-    const newSelectAll = !selectAll;
-    setSelectAll(newSelectAll);
-    setCartItems(items =>
-      items.map(item => ({ ...item, isSelected: newSelectAll }))
-    );
+  const handleAddToWishlist = (item: typeof cartItems[0]) => {
+    toggleWishlist({
+      id: item.id,
+      image: item.image,
+      title: item.title,
+      price: item.price,
+      originalPrice: item.originalPrice,
+      rating: 4.5,
+      sold: 100,
+      discount: item.discount,
+      isAvailable: true,
+      isFreeShipping: item.isFreeShipping,
+      location: "Jakarta"
+    });
   };
 
   const selectedItems = cartItems.filter(item => item.isSelected);
@@ -196,7 +169,7 @@ const ShoppingCart = () => {
                 <div className="flex items-center space-x-3">
                   <Checkbox
                     id="select-all"
-                    checked={selectAll}
+                    checked={cartItems.every(item => item.isSelected)}
                     onCheckedChange={toggleSelectAll}
                   />
                   <label htmlFor="select-all" className="font-medium cursor-pointer">
@@ -277,7 +250,12 @@ const ShoppingCart = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-muted-foreground">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-muted-foreground"
+                            onClick={() => handleAddToWishlist(item)}
+                          >
                             <Heart className="h-4 w-4" />
                           </Button>
                         </div>
