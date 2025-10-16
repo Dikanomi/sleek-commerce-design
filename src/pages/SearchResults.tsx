@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import { searchProducts, convertProduct } from "@/services/api";
 import { Search, Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -25,67 +26,31 @@ const SearchResults = () => {
   const [sortBy, setSortBy] = useState("relevance");
   const [priceRange, setPriceRange] = useState([0, 50000000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Mock search results - in real app, this would come from API
-  const searchResults = [
-    {
-      id: "s1",
-      image: productSmartphone,
-      title: "Smartphone Android RAM 8GB Storage 256GB Camera 108MP Pro Max",
-      price: 2499000,
-      originalPrice: 4999000,
-      rating: 4.7,
-      sold: 856,
-      discount: 50,
-      isFreeShipping: true,
-      location: "Bandung",
-      relevanceScore: 95
-    },
-    {
-      id: "s2",
-      image: productLaptop,
-      title: "Laptop Gaming Intel i7 RAM 16GB SSD 512GB RTX 3060 Pro",
-      price: 12999000,
-      originalPrice: 18999000,
-      rating: 4.9,
-      sold: 432,
-      discount: 32,
-      isFreeShipping: true,
-      location: "Surabaya",
-      relevanceScore: 87
-    },
-    {
-      id: "s3",
-      image: productHeadphones,
-      title: "Headphone Wireless Premium Bluetooth 5.0 Noise Cancelling Pro",
-      price: 299000,
-      originalPrice: 999000,
-      rating: 4.8,
-      sold: 1234,
-      discount: 70,
-      isFreeShipping: true,
-      location: "Jakarta Pusat",
-      relevanceScore: 92
-    },
-    // Duplicate for demonstration
-    ...Array(9).fill(null).map((_, index) => ({
-      id: `s${index + 4}`,
-      image: [productSmartphone, productLaptop, productHeadphones][index % 3],
-      title: [
-        "Samsung Galaxy S24 Ultra 256GB Smartphone Android",
-        "ASUS ROG Zephyrus Gaming Laptop RTX 4060",
-        "Sony WH-1000XM5 Wireless Headphone Premium"
-      ][index % 3],
-      price: [21999000, 19999000, 4299000][index % 3],
-      originalPrice: [24999000, 23999000, 4999000][index % 3],
-      rating: 4.5 + (index % 5) * 0.1,
-      sold: 100 + index * 50,
-      discount: 10 + (index % 3) * 5,
-      isFreeShipping: true,
-      location: ["Jakarta", "Bandung", "Surabaya"][index % 3],
-      relevanceScore: 80 - index * 2
-    }))
-  ];
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!query) {
+        setSearchResults([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await searchProducts(query);
+        const convertedResults = data.products.map(convertProduct);
+        setSearchResults(convertedResults);
+      } catch (error) {
+        console.error('Error searching products:', error);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    performSearch();
+  }, [query]);
 
   const filteredResults = searchResults.filter(product => {
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
@@ -94,8 +59,6 @@ const SearchResults = () => {
 
   const sortedResults = [...filteredResults].sort((a, b) => {
     switch (sortBy) {
-      case "relevance":
-        return b.relevanceScore - a.relevanceScore;
       case "price-low":
         return a.price - b.price;
       case "price-high":
@@ -103,7 +66,7 @@ const SearchResults = () => {
       case "rating":
         return b.rating - a.rating;
       case "newest":
-        return b.sold - a.sold; // Mock newest by sold count
+        return b.sold - a.sold;
       default:
         return 0;
     }
@@ -124,10 +87,6 @@ const SearchResults = () => {
     setPriceRange([0, 50000000]);
     setSortBy("relevance");
   };
-
-  useEffect(() => {
-    setNewQuery(query);
-  }, [query]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -307,6 +266,10 @@ const SearchResults = () => {
                 ))}
               </div>
             </div>
+          </div>
+        ) : loading ? (
+          <div className="text-center py-20">
+            <p className="text-lg text-muted-foreground">Mencari produk...</p>
           </div>
         ) : sortedResults.length === 0 ? (
           // No Results

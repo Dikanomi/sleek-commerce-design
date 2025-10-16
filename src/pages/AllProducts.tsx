@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, Grid3X3, List, Star, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/product-card";
 
 import { Link } from "react-router-dom";
+import { fetchProducts, fetchCategories, convertProduct } from "@/services/api";
 
 const AllProducts = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,120 +23,36 @@ const AllProducts = () => {
   const [priceRange, setPriceRange] = useState([0, 25000000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = [
-    {
-      id: "1",
-      title: "iPhone 15 Pro Max",
-      price: 20999000,
-      originalPrice: 22999000,
-      image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=400&fit=crop",
-      rating: 4.8,
-      sold: 124,
-      category: "Smartphone",
-      brand: "Apple",
-      isNew: true,
-      isSale: true,
-      discount: 10,
-      isFlashSale: true,
-      isFreeShipping: true,
-      location: "Jakarta",
-      description: "iPhone terbaru dengan chip A17 Pro dan kamera canggih"
-    },
-    {
-      id: "2",
-      title: "MacBook Air M3",
-      price: 18999000,
-      originalPrice: undefined,
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop",
-      rating: 4.9,
-      sold: 89,
-      category: "Laptop",
-      brand: "Apple",
-      isNew: true,
-      isSale: false,
-      discount: 0,
-      isFlashSale: false,
-      isFreeShipping: true,
-      location: "Jakarta",
-      description: "Laptop tipis dengan performa tinggi dan baterai tahan lama"
-    },
-    {
-      id: "3",
-      title: "Samsung Galaxy S24 Ultra",
-      price: 19999000,
-      originalPrice: 21999000,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=400&fit=crop",
-      rating: 4.7,
-      sold: 156,
-      category: "Smartphone", 
-      brand: "Samsung",
-      isNew: false,
-      isSale: true,
-      discount: 9,
-      isFlashSale: false,
-      isFreeShipping: true,
-      location: "Jakarta",
-      description: "Flagship Android dengan S Pen dan kamera 200MP"
-    },
-    {
-      id: "4",
-      title: "Sony WH-1000XM5",
-      price: 4299000,
-      originalPrice: 4999000,
-      image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=400&h=400&fit=crop",
-      rating: 4.6,
-      sold: 234,
-      category: "Audio",
-      brand: "Sony",
-      isNew: false,
-      isSale: true,
-      discount: 14,
-      isFlashSale: false,
-      isFreeShipping: false,
-      location: "Jakarta",
-      description: "Headphone noise-cancelling terbaik untuk audiophile"
-    },
-    {
-      id: "5",
-      title: "iPad Pro 12.9\"",
-      price: 16999000,
-      originalPrice: undefined,
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=400&fit=crop",
-      rating: 4.8,
-      sold: 67,
-      category: "Tablet",
-      brand: "Apple",
-      isNew: true,
-      isSale: false,
-      discount: 0,
-      isFlashSale: false,
-      isFreeShipping: true,
-      location: "Jakarta",
-      description: "Tablet pro dengan chip M2 untuk kreativitas tanpa batas"
-    },
-    {
-      id: "6",
-      title: "Dell XPS 13",
-      price: 15999000,
-      originalPrice: 17999000,
-      image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=400&fit=crop",
-      rating: 4.5,
-      sold: 98,
-      category: "Laptop",
-      brand: "Dell",
-      isNew: false,
-      isSale: true,
-      discount: 11,
-      isFlashSale: false,
-      isFreeShipping: true,
-      location: "Jakarta",
-      description: "Laptop premium dengan layar InfinityEdge yang memukau"
-    }
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [productsData, categoriesData] = await Promise.all([
+          fetchProducts(100),
+          fetchCategories()
+        ]);
 
-  const categories = ["Smartphone", "Laptop", "Tablet", "Audio", "Aksesoris"];
-  const brands = ["Apple", "Samsung", "Sony", "Dell", "Xiaomi", "Asus"];
+        const convertedProducts = productsData.products.map(convertProduct);
+        setProducts(convertedProducts);
+        setCategories(categoriesData);
+        
+        // Extract unique brands
+        const uniqueBrands = [...new Set(convertedProducts.map(p => p.brand))];
+        setBrands(uniqueBrands);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleCategoryChange = (category: string, checked: boolean) => {
     if (checked) {
@@ -340,7 +257,11 @@ const AllProducts = () => {
 
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            {sortedProducts.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">Memuat produk...</p>
+              </div>
+            ) : sortedProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">
                   Tidak ada produk yang sesuai dengan filter Anda

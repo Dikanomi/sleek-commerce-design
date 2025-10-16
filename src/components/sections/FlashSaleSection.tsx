@@ -2,71 +2,35 @@ import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ui/product-card";
-import productHeadphones from "@/assets/product-headphones.jpg";
-import productSmartphone from "@/assets/product-smartphone.jpg";
-import productLaptop from "@/assets/product-laptop.jpg";
-
-const flashSaleProducts = [
-  {
-    id: "fs1",
-    image: productHeadphones,
-    title: "Headphone Wireless Premium Bluetooth 5.0 Noise Cancelling",
-    price: 299000,
-    originalPrice: 999000,
-    rating: 4.8,
-    sold: 1234,
-    discount: 70,
-    isFlashSale: true,
-    isFreeShipping: true,
-    location: "Jakarta Pusat"
-  },
-  {
-    id: "fs2",
-    image: productSmartphone,
-    title: "Smartphone Android RAM 8GB Storage 256GB Camera 108MP",
-    price: 2499000,
-    originalPrice: 4999000,
-    rating: 4.7,
-    sold: 856,
-    discount: 50,
-    isFlashSale: true,
-    isFreeShipping: true,
-    location: "Bandung"
-  },
-  {
-    id: "fs3",
-    image: productLaptop,
-    title: "Laptop Gaming Intel i7 RAM 16GB SSD 512GB RTX 3060",
-    price: 12999000,
-    originalPrice: 18999000,
-    rating: 4.9,
-    sold: 432,
-    discount: 32,
-    isFlashSale: true,
-    isFreeShipping: true,
-    location: "Surabaya"
-  },
-  {
-    id: "fs4",
-    image: productHeadphones,
-    title: "TWS Earbuds Pro Max Wireless Charging Case",
-    price: 199000,
-    originalPrice: 599000,
-    rating: 4.6,
-    sold: 2341,
-    discount: 67,
-    isFlashSale: true,
-    isFreeShipping: true,
-    location: "Jakarta Selatan"
-  }
-];
+import { fetchProducts, convertProduct } from "@/services/api";
 
 const FlashSaleSection = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     hours: 6,
     minutes: 42,
     seconds: 18
   });
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts(8);
+        const flashSaleProducts = data.products
+          .filter(p => p.discountPercentage > 10)
+          .slice(0, 4)
+          .map(convertProduct);
+        setProducts(flashSaleProducts);
+      } catch (error) {
+        console.error('Error loading flash sale products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -123,9 +87,15 @@ const FlashSaleSection = () => {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {flashSaleProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+          {loading ? (
+            <div className="col-span-4 text-center py-8">
+              <p className="text-muted-foreground">Memuat produk...</p>
+            </div>
+          ) : (
+            products.map((product) => (
+              <ProductCard key={product.id} {...product} />
+            ))
+          )}
         </div>
 
         {/* Mobile View All Button */}

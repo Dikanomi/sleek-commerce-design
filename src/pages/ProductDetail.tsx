@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { fetchProduct, fetchProducts, convertProduct } from "@/services/api";
 import { Minus, Plus, Heart, Share2, Star, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,158 +11,60 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/ui/product-card";
-import productHeadphones from "@/assets/product-headphones.jpg";
-import productSmartphone from "@/assets/product-smartphone.jpg";
-import productLaptop from "@/assets/product-laptop.jpg";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock product data - in real app this would come from API
-  const product = {
-    id: "fs2",
-    title: "Smartphone Android RAM 8GB Storage 256GB Camera 108MP",
-    images: [productSmartphone, productHeadphones, productLaptop],
-    price: 2499000,
-    originalPrice: 4999000,
-    discount: 50,
-    rating: 4.7,
-    totalReviews: 1234,
-    sold: 856,
-    location: "Bandung",
-    seller: "ElektronikStore Official",
-    description: "Smartphone flagship dengan performa tinggi, kamera profesional 108MP, dan baterai tahan lama. Cocok untuk fotografi, gaming, dan produktivitas sehari-hari.",
-    specifications: {
-      "Layar": "6.7 inch AMOLED, 120Hz",
-      "Processor": "Snapdragon 8 Gen 2",
-      "RAM": "8GB LPDDR5",
-      "Storage": "256GB UFS 3.1",
-      "Kamera Belakang": "108MP + 12MP + 12MP",
-      "Kamera Depan": "32MP",
-      "Baterai": "5000mAh, Fast Charging 67W",
-      "OS": "Android 14",
-      "Dimensi": "163.2 x 75.4 x 8.9 mm",
-      "Berat": "234g"
-    },
-    features: [
-      "IP68 Water Resistant",
-      "5G Ready",
-      "Wireless Charging",
-      "NFC Support",
-      "Stereo Speaker",
-      "In-Display Fingerprint"
-    ],
-    stock: 25,
-    isFlashSale: true,
-    isFreeShipping: true
-  };
+  useEffect(() => {
+    const loadProduct = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const [productData, relatedData] = await Promise.all([
+          fetchProduct(id),
+          fetchProducts(8)
+        ]);
 
-  const reviews = [
-    {
-      id: 1,
-      name: "Budi Santoso",
-      rating: 5,
-      comment: "Kualitas sangat bagus, kamera jernih banget. Pengiriman cepat, packaging aman. Recommended!",
-      date: "2 hari yang lalu",
-      helpful: 12
-    },
-    {
-      id: 2,
-      name: "Siti Rahayu",
-      rating: 4,
-      comment: "Produk sesuai deskripsi, performa lancar untuk gaming. Cuma agak berat aja buat penggunaan lama.",
-      date: "1 minggu yang lalu",
-      helpful: 8
-    },
-    {
-      id: 3,
-      name: "Ahmad Fauzi",
-      rating: 5,
-      comment: "Sudah pakai 2 bulan, baterai awet seharian penuh. Fast charging benar-benar cepat.",
-      date: "2 minggu yang lalu",
-      helpful: 15
-    }
-  ];
+        const convertedProduct = {
+          ...convertProduct(productData),
+          images: productData.images,
+          totalReviews: Math.floor(Math.random() * 2000) + 100,
+          seller: `${productData.brand} Official Store`,
+          specifications: {
+            "Brand": productData.brand,
+            "Category": productData.category,
+            "Stock": `${productData.stock} unit`,
+            "Weight": `${productData.weight || 500}g`,
+            "Warranty": productData.warrantyInformation || "1 Year",
+            "Shipping": productData.shippingInformation || "Ships in 1-2 days"
+          },
+          features: [
+            productData.warrantyInformation || "Warranty included",
+            productData.returnPolicy || "30 Days Return",
+            productData.shippingInformation || "Fast Shipping"
+          ],
+          reviews: productData.reviews || []
+        };
 
-  const relatedProducts = [
-    {
-      id: "r1",
-      image: productLaptop,
-      title: "MacBook Air M2 13-inch 8GB 256GB",
-      price: 18999000,
-      originalPrice: 21999000,
-      rating: 4.9,
-      sold: 234,
-      discount: 14,
-      isFreeShipping: true,
-      location: "Jakarta Pusat"
-    },
-    {
-      id: "r2",
-      image: productHeadphones,
-      title: "Sony WH-1000XM5 Noise Canceling",
-      price: 4299000,
-      originalPrice: 4999000,
-      rating: 4.7,
-      sold: 567,
-      discount: 14,
-      isFreeShipping: true,
-      location: "Bandung"
-    }
-  ];
+        setProduct(convertedProduct);
+        
+        const convertedRelated = relatedData.products.slice(0, 4).map(convertProduct);
+        setRelatedProducts(convertedRelated);
+      } catch (error) {
+        console.error('Error loading product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const comparisonProducts = [
-    {
-      id: product.id,
-      name: product.title,
-      image: product.images[0],
-      price: product.price,
-      rating: product.rating,
-      storage: "256GB",
-      camera: "108MP",
-      ram: "8GB",
-      battery: "5000mAh",
-      processor: "Snapdragon 8 Gen 2"
-    },
-    {
-      id: "comp1",
-      name: "iPhone 15 Pro Max 256GB",
-      image: productSmartphone,
-      price: 21999000,
-      rating: 4.8,
-      storage: "256GB",
-      camera: "48MP",
-      ram: "8GB",
-      battery: "4441mAh",
-      processor: "A17 Pro"
-    },
-    {
-      id: "comp2", 
-      name: "Samsung Galaxy S24 Ultra 256GB",
-      image: productSmartphone,
-      price: 19999000,
-      rating: 4.6,
-      storage: "256GB", 
-      camera: "200MP",
-      ram: "12GB",
-      battery: "5000mAh",
-      processor: "Snapdragon 8 Gen 3"
-    },
-    {
-      id: "comp3",
-      name: "Google Pixel 8 Pro 256GB", 
-      image: productSmartphone,
-      price: 15999000,
-      rating: 4.5,
-      storage: "256GB",
-      camera: "50MP",
-      ram: "12GB", 
-      battery: "5050mAh",
-      processor: "Google Tensor G3"
-    }
-  ];
+    loadProduct();
+  }, [id]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -180,6 +83,33 @@ const ProductDetail = () => {
     ));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <p className="text-lg text-muted-foreground">Memuat produk...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <p className="text-lg text-muted-foreground">Produk tidak ditemukan</p>
+          <Button className="mt-4" asChild>
+            <Link to="/">Kembali ke Beranda</Link>
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -189,9 +119,9 @@ const ProductDetail = () => {
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-foreground">Beranda</Link>
           <span>/</span>
-          <Link to="/category/elektronik" className="hover:text-foreground">Elektronik</Link>
+          <Link to="/products" className="hover:text-foreground">{product.category}</Link>
           <span>/</span>
-          <span className="text-foreground">Smartphone</span>
+          <span className="text-foreground">{product.title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -207,16 +137,16 @@ const ProductDetail = () => {
             </div>
             
             {/* Thumbnail Images */}
-            <div className="flex space-x-2">
-              {product.images.map((image, index) => (
+            <div className="flex space-x-2 overflow-x-auto">
+              {product.images.map((image: string, index: number) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                  className={`w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 ${
                     selectedImage === index ? 'border-primary' : 'border-border'
                   }`}
                 >
-                  <img src={image} alt="" className="w-full h-full object-cover" />
+                  <img src={image} alt={`${product.title} ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -226,283 +156,249 @@ const ProductDetail = () => {
           <div className="space-y-6">
             {/* Title & Badges */}
             <div>
-              <div className="flex items-center space-x-2 mb-2">
+              <h1 className="text-3xl font-bold mb-3">{product.title}</h1>
+              <div className="flex items-center space-x-2 mb-4">
                 {product.isFlashSale && (
-                  <Badge className="bg-accent">⚡ Flash Sale</Badge>
+                  <Badge className="bg-accent text-accent-foreground">⚡ Flash Sale</Badge>
                 )}
-                <Badge variant="destructive">-{product.discount}%</Badge>
+                {product.discount > 0 && (
+                  <Badge variant="destructive">-{product.discount}%</Badge>
+                )}
                 {product.isFreeShipping && (
                   <Badge variant="outline">Gratis Ongkir</Badge>
                 )}
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-                {product.title}
-              </h1>
-              
-              {/* Rating & Reviews */}
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-1">
-                  <div className="flex">{renderStars(product.rating)}</div>
-                  <span className="font-medium">{product.rating}</span>
-                </div>
-                <span className="text-muted-foreground">
-                  {product.totalReviews.toLocaleString()} ulasan
-                </span>
-                <span className="text-muted-foreground">
-                  {product.sold.toLocaleString()} terjual
-                </span>
+            </div>
+
+            {/* Rating */}
+            <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center space-x-1">
+                {renderStars(product.rating)}
+                <span className="ml-2 font-medium">{product.rating}</span>
               </div>
+              <span className="text-muted-foreground">|</span>
+              <span className="text-muted-foreground">{product.totalReviews} Penilaian</span>
+              <span className="text-muted-foreground">|</span>
+              <span className="text-muted-foreground">{product.sold} Terjual</span>
             </div>
 
             {/* Price */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl font-bold text-foreground">
-                  {formatPrice(product.price)}
-                </span>
-                <span className="text-lg text-muted-foreground line-through">
-                  {formatPrice(product.originalPrice)}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Hemat {formatPrice(product.originalPrice - product.price)}
-              </p>
-            </div>
-
-            {/* Seller Info */}
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{product.seller}</h3>
-                    <p className="text-sm text-muted-foreground">{product.location}</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Kunjungi Toko
-                  </Button>
+              <CardContent className="p-6">
+                <div className="flex items-baseline space-x-3">
+                  <span className="text-3xl font-bold text-primary">
+                    {formatPrice(product.price)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-lg text-muted-foreground line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quantity & Actions */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Jumlah:</label>
+            {/* Seller Info */}
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center border border-border rounded-lg">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="px-4 py-2 font-medium">{quantity}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      disabled={quantity >= product.stock}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                  <Avatar>
+                    <AvatarFallback>{product.brand[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{product.seller}</p>
+                    <p className="text-sm text-muted-foreground">{product.location}</p>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    Stok: {product.stock} tersisa
-                  </span>
                 </div>
-              </div>
+                <Button variant="outline" size="sm">Kunjungi Toko</Button>
+              </CardContent>
+            </Card>
 
-              {/* Action Buttons */}
+            {/* Quantity */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Jumlah</label>
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 text-center border border-border rounded-md py-2"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Stok: {product.stock}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
               <div className="flex space-x-3">
                 <Button size="lg" className="flex-1">
-                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  <ShoppingCart className="mr-2 h-5 w-5" />
                   Tambah ke Keranjang
                 </Button>
-                <Button size="lg" variant="outline" className="flex-1">
-                  Beli Sekarang
+                <Button variant="outline" size="icon" className="h-11 w-11">
+                  <Heart className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" size="icon" className="h-11 w-11">
+                  <Share2 className="h-5 w-5" />
                 </Button>
               </div>
-
-              {/* Secondary Actions */}
-              <div className="flex space-x-2">
-                <Button variant="ghost" size="sm">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Wishlist
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Bagikan
-                </Button>
-              </div>
+              <Button size="lg" variant="secondary" className="w-full">
+                Beli Sekarang
+              </Button>
             </div>
 
             {/* Shipping Info */}
-            <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-              <div className="flex items-center space-x-2 text-sm">
-                <Truck className="w-4 h-4 text-success" />
-                <span>Gratis ongkir ke seluruh Indonesia</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <Shield className="w-4 h-4 text-success" />
-                <span>Garansi resmi 1 tahun</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <RotateCcw className="w-4 h-4 text-success" />
-                <span>14 hari tukar barang</span>
-              </div>
-            </div>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Truck className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Pengiriman</p>
+                    <p className="text-sm text-muted-foreground">Gratis ongkir min. belanja Rp 50.000</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Shield className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Garansi</p>
+                    <p className="text-sm text-muted-foreground">{product.specifications.Warranty}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <RotateCcw className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Pengembalian</p>
+                    <p className="text-sm text-muted-foreground">Bisa dikembalikan dalam 7 hari</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         {/* Product Details Tabs */}
         <Tabs defaultValue="description" className="mb-12">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
             <TabsTrigger value="description">Deskripsi</TabsTrigger>
             <TabsTrigger value="specifications">Spesifikasi</TabsTrigger>
             <TabsTrigger value="reviews">Ulasan ({product.totalReviews})</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="description" className="space-y-4">
+          <TabsContent value="description" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Deskripsi Produk</h3>
-                <p className="text-muted-foreground mb-6">{product.description}</p>
+                <h3 className="text-xl font-bold mb-4">Detail Produk</h3>
+                <p className="text-muted-foreground mb-6">
+                  {product.description}
+                </p>
                 
-                <h4 className="font-semibold mb-3">Fitur Unggulan:</h4>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-primary rounded-full"></span>
-                      <span className="text-sm">{feature}</span>
-                    </li>
+                <h4 className="font-semibold mb-3">Fitur Utama:</h4>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                  {product.features.map((feature: string, index: number) => (
+                    <li key={index}>{feature}</li>
                   ))}
                 </ul>
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="specifications">
+
+          <TabsContent value="specifications" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Spesifikasi Teknis</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className="text-xl font-bold mb-4">Spesifikasi Teknis</h3>
+                <div className="grid gap-3">
                   {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex flex-col space-y-1 pb-3 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">{key}</span>
-                      <span className="font-medium">{value}</span>
+                    <div key={key} className="flex border-b border-border pb-3">
+                      <span className="w-1/3 font-medium">{key}</span>
+                      <span className="w-2/3 text-muted-foreground">{value as string}</span>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="reviews" className="space-y-4">
+
+          <TabsContent value="reviews" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Ulasan Pelanggan</h3>
+                <h3 className="text-xl font-bold mb-4">Ulasan Pembeli</h3>
+                
+                {/* Rating Summary */}
+                <div className="bg-muted p-6 rounded-lg mb-6">
+                  <div className="flex items-center space-x-6">
+                    <div>
+                      <div className="text-5xl font-bold">{product.rating}</div>
+                      <div className="flex items-center mt-2">
+                        {renderStars(product.rating)}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {product.totalReviews} Penilaian
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Reviews List */}
                 <div className="space-y-6">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="border-b border-border pb-6 last:border-b-0">
-                      <div className="flex items-start space-x-4">
-                        <Avatar>
-                          <AvatarFallback>{review.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="font-medium">{review.name}</span>
-                            <div className="flex">{renderStars(review.rating)}</div>
-                            <span className="text-sm text-muted-foreground">{review.date}</span>
+                  {product.reviews.length > 0 ? (
+                    product.reviews.map((review: any, index: number) => (
+                      <div key={index} className="border-b border-border pb-6 last:border-0">
+                        <div className="flex items-start space-x-3">
+                          <Avatar>
+                            <AvatarFallback>{review.reviewerName?.[0] || 'U'}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">{review.reviewerName || 'Anonymous'}</p>
+                            <div className="flex items-center space-x-2 my-1">
+                              <div className="flex">
+                                {renderStars(review.rating)}
+                              </div>
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(review.date).toLocaleDateString('id-ID')}
+                              </span>
+                            </div>
+                            <p className="text-muted-foreground mt-2">{review.comment}</p>
                           </div>
-                          <p className="text-muted-foreground mb-2">{review.comment}</p>
-                          <Button variant="ghost" size="sm" className="text-xs">
-                            👍 Membantu ({review.helpful})
-                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">Belum ada ulasan</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        {/* Product Comparison Table */}
-        <section className="mb-12">
-          <h3 className="text-2xl font-bold mb-6">Perbandingan dengan Produk Serupa</h3>
-          <Card>
-            <CardContent className="p-6">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[200px]">Produk</TableHead>
-                      <TableHead>Harga</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Storage</TableHead>
-                      <TableHead>Kamera</TableHead>
-                      <TableHead>RAM</TableHead>
-                      <TableHead>Baterai</TableHead>
-                      <TableHead>Processor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {comparisonProducts.map((item, index) => (
-                      <TableRow key={item.id} className={index === 0 ? "bg-primary/5" : ""}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <img 
-                              src={item.image} 
-                              alt={item.name}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                            <div>
-                              <p className="font-medium text-sm">{item.name}</p>
-                              {index === 0 && (
-                                <Badge variant="secondary" className="text-xs mt-1">
-                                  Produk Ini
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatPrice(item.price)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <div className="flex">{renderStars(item.rating)}</div>
-                            <span className="text-sm font-medium">{item.rating}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{item.storage}</TableCell>
-                        <TableCell>{item.camera}</TableCell>
-                        <TableCell>{item.ram}</TableCell>
-                        <TableCell>{item.battery}</TableCell>
-                        <TableCell>{item.processor}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
         {/* Related Products */}
-        <section>
-          <h3 className="text-2xl font-bold mb-6">Produk Terkait</h3>
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Produk Terkait</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {relatedProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
+            {relatedProducts.map((relProduct) => (
+              <ProductCard key={relProduct.id} {...relProduct} />
             ))}
           </div>
         </section>
       </main>
-
+      
       <Footer />
     </div>
   );
